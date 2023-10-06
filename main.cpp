@@ -35,7 +35,6 @@ void ChatServer(void)
 
 	/* ソケットに名前を付ける */
 	memset(&saddr, 0, sizeof(SOCKADDR_IN));
-	/*　☆スライドを参考にSOCKADDR_IN型変数「saddr」の設定　*/
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(uport);
 	saddr.sin_addr.s_addr = INADDR_ANY;
@@ -78,16 +77,16 @@ void ChatServer(void)
 		int nRcv;
 		char szBuf[1024];
 
-		printf("送信-->", szBuf,1024);
+		nRcv = recv(s, szBuf, sizeof(szBuf) - 1, 0);
+		szBuf[nRcv] = '\0';
+
+		printf("受信--> %s\n", szBuf);
+		printf("送信-->");
+
 		scanf_s("%s", szBuf, 1024);
 		fflush(stdin);
 
 		send(s, szBuf, (int)strlen(szBuf), 0);
-
-		nRcv = recv(s, szBuf, sizeof(szBuf) - 1, 0);
-		szBuf[nRcv] = '\0';
-		printf("受信-->%s\n", szBuf);
-
 	}
 
 	/* ソケットを閉じる */
@@ -110,7 +109,7 @@ void ChatClient()
 	fflush(stdin);
 
 	/* サーバ名またはサーバのIPアドレスを入力 */
-	printf("IPアドレス -->");
+	printf("IPアドレス --> ");
 	scanf_s("%s", szServer, 1024);
 	fflush(stdin);
 
@@ -154,7 +153,7 @@ void ChatClient()
 		int nRcv;
 		char szBuf[1024];
 
-		printf("送信-->", szBuf, 1024);
+		printf("送信-->");
 		scanf_s("%s", szBuf, 1024);
 		fflush(stdin);
 
@@ -162,7 +161,7 @@ void ChatClient()
 
 		nRcv = recv(s, szBuf, sizeof(szBuf) - 1, 0);
 		szBuf[nRcv] = '\0';
-		printf("受信-->%s\n", szBuf);
+		printf("受信--> %s\n", szBuf);
 	}
 
 	/* ソケットを閉じる */
@@ -201,5 +200,3 @@ int main(void)
 
 	return 0;
 }
-
-//192.168.10.11
