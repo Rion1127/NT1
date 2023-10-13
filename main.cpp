@@ -116,16 +116,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			SendMessage(hwnd, WM_CLOSE, NULL, NULL);
 			break;
 		case VK_RIGHT:
-			//☆　→キー押されたらサーバ側キャラのX座標を更新
+			pos1P.x++;
 			break;
 		case VK_LEFT:
-			//☆　←キー押されたらサーバ側キャラのX座標を更新
+			pos1P.x--;
 			break;
 		case VK_DOWN:
-			//☆　↓キー押されたらサーバ側キャラのY座標を更新
+			pos1P.y++;
 			break;
 		case VK_UP:
-			//☆　↑キー押されたらサーバ側キャラのY座標を更新
+			pos1P.y--;
 			break;
 		}
 
@@ -180,23 +180,23 @@ DWORD WINAPI Threadfunc(void* px) {
 	int iLen, iRecv;
 
 	// リスンソケット
-	sWait = socket(/*☆*/, /*☆*/, 0);
+	sWait = socket(AF_INET, SOCK_STREAM, 0);
 
 	ZeroMemory(&saLocal, sizeof(saLocal));
 
 	// 8000番に接続待機用ソケット作成
-	saLocal.sin_family = /*☆*/;
-	saLocal.sin_addr.s_addr = /*☆*/;
-	saLocal.sin_port = htons(/*☆*/);
+	saLocal.sin_family = AF_INET;
+	saLocal.sin_addr.s_addr = INADDR_ANY;
+	saLocal.sin_port = htons(wPort);
 
-	if (bind(/*☆*/, /*☆*/, /*☆*/) == SOCKET_ERROR) {
+	if (bind(sWait, (SOCKADDR*)&saConnect, sizeof(saConnect)) == SOCKET_ERROR) {
 
 		closesocket(sWait);
 		SetWindowText(hwMain, "接続待機ソケット失敗");
 		return 1;
 	}
 
-	if (listen(/*☆*/, 2) == SOCKET_ERROR) {
+	if (listen(sWait, 2) == SOCKET_ERROR) {
 
 		closesocket(sWait);
 		SetWindowText(hwMain, "接続待機ソケット失敗");
@@ -208,10 +208,10 @@ DWORD WINAPI Threadfunc(void* px) {
 	iLen = sizeof(saConnect);
 
 	// 接続受け入れて送受信用ソケット作成
-	sConnect = accept(/*☆*/, /*☆*/, /*☆*/);
+	sConnect = accept(sWait, (sockaddr*)&saLocal, &iLen);
 
 	// 接続待ち用ソケット解放
-	closesocket(/*☆*/);
+	closesocket(sWait);
 
 	if (sConnect == INVALID_SOCKET) {
 
@@ -236,12 +236,12 @@ DWORD WINAPI Threadfunc(void* px) {
 		old_pos2P = pos2P;
 
 		// クライアント側キャラの位置情報を受け取り
-		nRcv = recv(/*☆*/, (char*)/*☆*/, sizeof(POS), 0);
+		nRcv = recv(sConnect, (char*)&pos2P, sizeof(POS), 0);
 
 		if (nRcv == SOCKET_ERROR)break;
 
 		// サーバ側キャラの位置情報を送信
-		send(/*☆*/, (const char*)/*☆*/, sizeof(POS), 0);
+		send(sConnect, (const char*)&pos1P, sizeof(POS), 0);
 
 		// 受信したクライアントが操作するキャラの座標が更新されていたら、更新領域を作って
 		// InvalidateRect関数でWM_PAINTメッセージを発行、キャラを再描画する
