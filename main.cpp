@@ -116,16 +116,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			SendMessage(hwnd, WM_CLOSE, NULL, NULL);
 			break;
 		case VK_RIGHT:
-			pos1P.x++;
+			pos1P.x+= 10;
 			break;
 		case VK_LEFT:
-			pos1P.x--;
+			pos1P.x-= 10;
 			break;
 		case VK_DOWN:
-			pos1P.y++;
+			pos1P.y+= 10;
 			break;
 		case VK_UP:
-			pos1P.y--;
+			pos1P.y-= 10;
 			break;
 		}
 
@@ -189,7 +189,7 @@ DWORD WINAPI Threadfunc(void* px) {
 	saLocal.sin_addr.s_addr = INADDR_ANY;
 	saLocal.sin_port = htons(wPort);
 
-	if (bind(sWait, (SOCKADDR*)&saConnect, sizeof(saConnect)) == SOCKET_ERROR) {
+	if (bind(sWait, (SOCKADDR*)&saLocal, sizeof(saLocal)) == SOCKET_ERROR) {
 
 		closesocket(sWait);
 		SetWindowText(hwMain, "接続待機ソケット失敗");
@@ -238,8 +238,9 @@ DWORD WINAPI Threadfunc(void* px) {
 		// クライアント側キャラの位置情報を受け取り
 		nRcv = recv(sConnect, (char*)&pos2P, sizeof(POS), 0);
 
-		if (nRcv == SOCKET_ERROR)break;
-
+		if (nRcv == SOCKET_ERROR) {
+			break;
+		}
 		// サーバ側キャラの位置情報を送信
 		send(sConnect, (const char*)&pos1P, sizeof(POS), 0);
 
